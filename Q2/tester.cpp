@@ -33,8 +33,8 @@ int main() {
 
     // Printing stats and results
     cout<< time_taken << endl;
-    cout<< convexHull.size() << endl;
 
+    cout<< convexHull.size() << endl;
     for (int i = 0; i < convexHull.size(); i++){
         cout << convexHull[i].first << " " << convexHull[i].second << endl;
     }

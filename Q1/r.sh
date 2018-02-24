@@ -1,20 +1,18 @@
-g++ -o q1 -fopenmp q1.cpp
-g++ -o gen gen.cpp
+set -e
 
-file="input.txt"
+g++ -o q1 -fopenmp q1.cpp prefixsum.cpp -Wall
+g++ -o gen gen.cpp -Wall
+echo "compiled";
+set -e
 
-for power in {13,17}
+rm out*
+for power in {18,20,22}
 do
 n=$((2**$power))
 printf "n= $n (2^$power)\n\n";
-for p in {2,4,8,16}
-do
-echo "p= $p";
-rm -f $file
-touch $file
-./gen $n >> $file
-./q1 $p $file 
-printf "\n";
-done;
+./q1 "./data/prefix-$n.txt"
+mv "out.txt" "out-$n.csv"
 echo "-------------------------------------"
 done;
+
+rm gen q1

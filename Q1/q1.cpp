@@ -1,126 +1,81 @@
 #include <bits/stdc++.h>
 #include <omp.h>
 #include <time.h>
+#include <string.h>
 using namespace std;
 
-double start, end;
-double Ts=0,Tp=0,S,E;
+double start, endt;
+double T[1000],S,E;
+
+extern vector<int> calcPrefixSum ( vector<int> input, int num_threads) ;
+vector <int> a;
 
 
 int main(int argc, char *argv[]){
+// omp_set_dynamic(0);     // Explicitly disable dynamic teams
 
 
+char* filename=argv[1];
 
-int num_threads=atoi(argv[1]);
-omp_set_dynamic(0);     // Explicitly disable dynamic teams
-omp_set_num_threads(num_threads);
-
-char* filename=argv[2];
-
+int n;
 fstream myfile;
 myfile.open(filename);
-int n,no;
 myfile>>n;
-no=n;//original n
+cout<<n<<endl;
+a.resize(n);
 
-int log2n=log2(n);
-if(pow(2,log2n)!=n)
-{
-    n=pow(2,log2n+1);
-    log2n+=1;
-}
-
-int *a,*original,*prefix;
-a=(int*) calloc((n+2),sizeof(int));
-original=(int*) calloc((n+2),sizeof(int));
+int *prefix;
+// original=(int*) calloc((n+2),sizeof(int));
 prefix=(int*) calloc((n+2),sizeof(int));
 
 
-for(int i=0;i<no;++i)
+for(int i=0;i<n;++i)
 {
     myfile>>a[i];
-    original[i]=a[i];
 }
-for(int i=no;i<n;++i)
-{
-    original[i]=0;
-    a[i]=0;
-}
-
 myfile.close();
 
-int last=a[n-1];
-int times=200;
 
+int times=40;
 
-//serial program
+prefix[0]=a[0];
+for(int i=1;i<n;++i)
+{prefix[i]=prefix[i-1]+a[i];}
+
+int maxp=64;
+
+//1,2...32 threads
+for(int p=1;p<=maxp;p*=2)
+{
 for(int m=0;m<times;++m)
 {
-start=omp_get_wtime();
-{
-    prefix[0]=a[0];
-    for(int i=1;i<n;i++)
-    {prefix[i]=prefix[i-1]+a[i];}
-}
-end=omp_get_wtime();
-Ts += (end - start);
-}
-Ts/=times;
-printf("Ts=%f seconds\n",Ts);
-
-
-// parallel program
-for(int m=0;m<times;++m)
-{
-    for(int i=0;i<n;++i)
-    {a[i]=original[i];}
 
 start=omp_get_wtime();
+
+vector <int> pre;
+pre=calcPrefixSum(a,p);
+
+endt=omp_get_wtime();
+T[p] += (endt - start);
+
+for(int i=0;i<n;++i)
+{assert (pre[i]==prefix[i]);}
+
+}
+T[p]/=times;
+printf("T[%d]=%f seconds\n",p,T[p]);
+
+}
+
+
+myfile.open("out.txt",fstream::out);
+for(int p=1;p<=maxp;p*=2)
 {
-    for(int d=0;d<log2n;++d){
-        unsigned int k=(1<<(d+1)),k2=(1<<d);
-
-        #pragma omp parallel for schedule(static) firstprivate(k,k2)
-        for(int i=0;i<n;i+=k){
-            a[i+k-1]+=a[i+k2-1];
-        }
-
-    }
-
-    a[n-1]=0;
-    for(int d=log2n-1;d>-1;--d){
-        unsigned int k=(1<<(d+1)),k2=(1<<d);
-
-        #pragma omp parallel for schedule(static) firstprivate(k,k2)
-        for(int i=0;i<n;i+=k){
-            int t=a[i+k2-1];
-            a[i+k2-1]=a[i+k-1];
-            a[i+k-1]+=t;
-        }
-
-    }
-    a[n]=a[n-1]+last;
+    myfile<<p<<','<<T[p]<<','<<(T[1]/T[p])<<'\n';
+    cout<<p<<','<<T[p]<<','<<(T[1]/T[p])<<'\n';
 }
-end=omp_get_wtime();
-Tp += (end - start);
+myfile.close();
 
-for(int i=1;i<=n;++i)
-{assert (a[i]==prefix[i-1]);}
-
-}
-Tp/=times;
-printf("Tp=%f seconds\n",Tp);//wall clock time
-
-
-S=Ts/Tp;
-printf("Speedup=%f\n",S);
-E=S/num_threads;
-printf("Efficiency=%f\n",E);
-// printf("Overhead=%f\n",(num_threads*Tp-Ts)/num_threads);
-
-// for(int i=1;i<no+1;++i)
-// {printf("%d ",a[i]);}
-// printf("\n");
 
     return 0;
 }
