@@ -1,16 +1,18 @@
 #!/bin/bash
 set -e
+g++ -o ch -fopenmp convexhull.cpp tester.cpp convexhull_s.cpp
 
-g++ -o ch -fopenmp convexhull.cpp tester.cpp
+# ./gen.sh
 
-for n in {5,10,30,50,70,100,500,1000}
+# rm -f out*
+for n in {2000,3000,4000,5000}
 do
 m=$n
-for
 echo "$n * $m";
-in="./data/feep-$n-$m-$p.pbm"
+in="./data/feep-$n-$m.pbm"
 ./ch < $in
-echo "-----------------------------";
+mv "outq2.txt" "out-$n-$m.csv"
+echo "-----------------------------------";
 done;
 
 rm ch

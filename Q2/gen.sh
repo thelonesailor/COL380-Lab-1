@@ -1,12 +1,9 @@
 g++ -O3 -o gen gen.cpp
 
-for n in {5,10,30,50,70,100,500,1000}
+for n in {1000,2000,3000,4000,5000,6000}
 do
 m=$n
-for p in {1,2,4,8,16,32}
-do
-./gen $n $m $p > ./data/feep-$n-$m-$p.pbm
-done;
+./gen $n $m > ./data/feep-$n-$m.pbm
 done;
 
 rm gen

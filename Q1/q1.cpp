@@ -5,7 +5,7 @@
 using namespace std;
 
 double start, endt;
-double T[1000],S,E;
+double T[1000];
 
 extern vector<int> calcPrefixSum ( vector<int> input, int num_threads) ;
 vector <int> a;
@@ -25,7 +25,6 @@ cout<<n<<endl;
 a.resize(n);
 
 int *prefix;
-// original=(int*) calloc((n+2),sizeof(int));
 prefix=(int*) calloc((n+2),sizeof(int));
 
 
@@ -36,7 +35,7 @@ for(int i=0;i<n;++i)
 myfile.close();
 
 
-int times=40;
+int times=50;
 
 prefix[0]=a[0];
 for(int i=1;i<n;++i)
@@ -44,7 +43,7 @@ for(int i=1;i<n;++i)
 
 int maxp=64;
 
-//1,2...32 threads
+//1,2...64 threads
 for(int p=1;p<=maxp;p*=2)
 {
 for(int m=0;m<times;++m)
@@ -71,8 +70,10 @@ printf("T[%d]=%f seconds\n",p,T[p]);
 myfile.open("out.txt",fstream::out);
 for(int p=1;p<=maxp;p*=2)
 {
-    myfile<<p<<','<<T[p]<<','<<(T[1]/T[p])<<'\n';
-    cout<<p<<','<<T[p]<<','<<(T[1]/T[p])<<'\n';
+    double S=(T[1]/T[p]);
+    double E=S/p;
+    myfile<<p<<','<<T[p]<<','<<S<<','<<E<<'\n';
+    cout<<p<<','<<T[p]<<','<<S<<','<<E<<'\n';
 }
 myfile.close();
 

@@ -5,8 +5,8 @@ g++ -o gen gen.cpp -Wall
 echo "compiled";
 set -e
 
-rm out*
-for power in {18,20,22}
+# rm -f out*
+for power in {22,24,26,28}
 do
 n=$((2**$power))
 printf "n= $n (2^$power)\n\n";
